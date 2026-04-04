@@ -45,7 +45,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
       
       // Setup SSE for real-time notifications
       const token = localStorage.getItem('kanban_token');
-      const evtSource = new EventSource(`http://localhost:4000/api/notifications/stream?token=${token}`);
+      const evtSource = new EventSource(`${window.location.origin}/api/notifications/stream?token=${token}`);
       
       evtSource.onmessage = (e) => {
         try {
