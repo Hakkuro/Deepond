@@ -18,7 +18,7 @@ for /f "tokens=5" %%a in ('netstat -aon ^| findstr :4000') do taskkill /f /pid %
 
 echo [System] Starting Unified 玄珀 (Deepond) Services...
 echo.
-node start.js
+node scripts\start.js
 
 echo.
 echo [System] Services stopped.
