@@ -1,0 +1,62 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme {
+  --color-brand-primary: #000000;
+  --color-brand-secondary: #262626;
+  --color-brand-accent: #737373;
+  
+  --shadow-premium: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-premium-dark: 0 4px 6px -1px rgb(0 0 0 / 0.5), 0 2px 4px -2px rgb(0 0 0 / 0.5);
+  
+  --radius-xl: 12px;
+  --radius-2xl: 16px;
+  --radius-3xl: 20px;
+}
+
+@layer base {
+  body {
+    @apply transition-colors duration-300 antialiased text-stone-950 bg-white dark:text-stone-50 dark:bg-black font-sans font-medium;
+  }
+}
+
+@layer utilities {
+  .glass {
+    @apply bg-white border border-stone-300 shadow-sm transition-all;
+  }
+  
+  .dark .glass {
+    @apply bg-stone-900 border border-stone-700 shadow-md transition-all;
+  }
+  
+  .glass-card {
+    @apply bg-white border border-stone-300 rounded-xl hover:border-black hover:shadow-lg transition-all duration-200;
+  }
+  
+  .dark .glass-card {
+    @apply bg-stone-900 border border-stone-700 rounded-xl hover:border-white hover:shadow-lg transition-all duration-200;
+  }
+
+  .text-gradient {
+    @apply text-black dark:text-white font-black tracking-tight;
+  }
+}
+
+/* Custom Scrollbar - Minimalist */
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-stone-300 dark:bg-stone-700 rounded-full;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-stone-500 dark:bg-stone-500;
+}
