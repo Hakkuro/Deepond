@@ -4,11 +4,12 @@ import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+const rootDir = path.resolve(__dirname, '..');
 
 console.log('\x1b[36m%s\x1b[0m', '--- 玄珀 (Deepond) Unified Runner ---');
 
 const runCommand = (command, args, name, color) => {
-  const child = spawn(command, args, { shell: true });
+  const child = spawn(command, args, { shell: true, cwd: rootDir });
   
   child.stdout.on('data', (data) => {
     process.stdout.write(`\x1b[${color}m[${name}]\x1b[0m ${data}`);

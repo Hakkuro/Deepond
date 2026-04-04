@@ -2,11 +2,10 @@
 setlocal enabledelayedexpansion
 
 echo ==========================================
-echo    玄珀 (Deepond) - Minimalist Kanban Platform
+echo    Deepond - Minimalist Kanban Platform
 echo ==========================================
 echo.
 
-:: Check for node_modules
 if not exist "node_modules\" (
     echo [System] node_modules not found. Installing dependencies...
     call npm install
@@ -16,7 +15,7 @@ echo [System] Cleaning up existing processes on ports 7000 and 4000...
 for /f "tokens=5" %%a in ('netstat -aon ^| findstr :7000') do taskkill /f /pid %%a >nul 2>&1
 for /f "tokens=5" %%a in ('netstat -aon ^| findstr :4000') do taskkill /f /pid %%a >nul 2>&1
 
-echo [System] Starting Unified 玄珀 (Deepond) Services...
+echo [System] Starting Unified Deepond Services...
 echo.
 node scripts\start.js
 
