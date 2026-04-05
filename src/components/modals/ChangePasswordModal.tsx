@@ -1,9 +1,11 @@
 import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { X, Lock, KeyRound, Loader2 } from 'lucide-react';
+import { KeyRound, Lock, Loader2 } from 'lucide-react';
 import { useAppContext } from '../../contexts/AppContext';
 import { useToast } from '../../contexts/ToastContext';
 import api from '../../lib/api';
+import { Modal } from '../ui/Modal';
+import { Input } from '../ui/Input';
+import { Button } from '../ui/Button';
 
 interface ChangePasswordModalProps {
   isOpen: boolean;
@@ -37,73 +39,41 @@ export function ChangePasswordModal({ isOpen, onClose }: ChangePasswordModalProp
   };
 
   return (
-    <AnimatePresence>
-      {isOpen && (
-        <>
-          <motion.div 
-            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/20 dark:bg-black/80 backdrop-blur-sm z-50 transition-colors"
-            onClick={onClose}
-          />
-          <motion.div 
-            initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-sm bg-white dark:bg-stone-900 rounded-[2rem] p-6 shadow-2xl z-50 border border-stone-200 dark:border-stone-800"
-          >
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-lg font-black text-black dark:text-white tracking-tight flex items-center gap-2">
-                <KeyRound size={18} />
-                {t.changePassword || "修改密码"}
-              </h3>
-              <button 
-                onClick={onClose} 
-                className="p-2 text-stone-400 hover:text-black dark:hover:text-white rounded-xl bg-stone-50 dark:bg-stone-800 hover:bg-stone-100 dark:hover:bg-stone-700 transition-colors"
-              >
-                <X size={16} strokeWidth={3} />
-              </button>
-            </div>
-            
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="space-y-1">
-                <label className="text-[10px] font-black text-stone-400 uppercase tracking-widest ml-1">{t.oldPassword || "旧密码"}</label>
-                <div className="relative group">
-                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-stone-400 group-focus-within:text-black dark:group-focus-within:text-white transition-colors" size={16} />
-                  <input
-                    type="password"
-                    value={oldPassword}
-                    onChange={e => setOldPassword(e.target.value)}
-                    className="w-full bg-stone-50 dark:bg-black border border-stone-200 dark:border-stone-800 rounded-2xl py-3 pl-10 pr-4 text-sm font-bold focus:outline-none focus:border-black dark:focus:border-white transition-all text-black dark:text-white"
-                    required
-                  />
-                </div>
-              </div>
-              <div className="space-y-1">
-                <label className="text-[10px] font-black text-stone-400 uppercase tracking-widest ml-1">{t.newPassword || "新密码"}</label>
-                <div className="relative group">
-                  <KeyRound className="absolute left-4 top-1/2 -translate-y-1/2 text-stone-400 group-focus-within:text-black dark:group-focus-within:text-white transition-colors" size={16} />
-                  <input
-                    type="password"
-                    value={newPassword}
-                    onChange={e => setNewPassword(e.target.value)}
-                    className="w-full bg-stone-50 dark:bg-black border border-stone-200 dark:border-stone-800 rounded-2xl py-3 pl-10 pr-4 text-sm font-bold focus:outline-none focus:border-black dark:focus:border-white transition-all text-black dark:text-white"
-                    required
-                  />
-                </div>
-              </div>
+    <Modal 
+      isOpen={isOpen} 
+      onClose={onClose} 
+      title={<span className="flex items-center gap-2"><KeyRound size={18} />{t.changePassword || "修改密码"}</span>}
+    >
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <Input
+          type="password"
+          label={t.oldPassword || "旧密码"}
+          icon={<Lock size={16} />}
+          value={oldPassword}
+          onChange={e => setOldPassword(e.target.value)}
+          required
+        />
+        <Input
+          type="password"
+          label={t.newPassword || "新密码"}
+          icon={<KeyRound size={16} />}
+          value={newPassword}
+          onChange={e => setNewPassword(e.target.value)}
+          required
+        />
 
-              <div className="pt-2">
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="w-full bg-black dark:bg-white text-white dark:text-black py-3 rounded-xl font-black text-sm hover:opacity-80 transition-all active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-2 shadow-xl"
-                >
-                   {loading && <Loader2 size={16} className="animate-spin" />}
-                   {t.confirm || "确认修改"}
-                </button>
-              </div>
-            </form>
-          </motion.div>
-        </>
-      )}
-    </AnimatePresence>
+        <div className="pt-2">
+          <Button
+            type="submit"
+            disabled={loading}
+            fullWidth
+            className="shadow-xl"
+          >
+             {loading && <Loader2 size={16} className="animate-spin" />}
+             {t.confirm || "确认修改"}
+          </Button>
+        </div>
+      </form>
+    </Modal>
   );
 }

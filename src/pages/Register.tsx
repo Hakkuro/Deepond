@@ -2,33 +2,39 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import api from '../lib/api';
 import { LayoutDashboard, User, Mail, Lock, ArrowRight, Languages } from 'lucide-react';
-import { motion } from 'framer-motion';
 import { useAppContext } from '../contexts/AppContext';
+import { Input } from '../components/ui/Input';
+import { Button } from '../components/ui/Button';
+import { Card } from '../components/ui/Card';
+import { modalScaleIn } from '../lib/animations';
 
 export default function Register() {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const { t, toggleLang, lang } = useAppContext();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLoading(true);
     try {
       await api.post('/auth/register', { username, email, password });
       navigate('/login');
     } catch (err: any) {
       setError(err.response?.data?.message || t.registerFailed);
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-white dark:bg-black p-4 transition-colors duration-300">
-      <motion.div 
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="max-w-md w-full bg-white dark:bg-stone-900 rounded-xl p-10 border border-stone-200 dark:border-stone-800 shadow-2xl relative"
+      <Card 
+        {...modalScaleIn}
+        className="max-w-md w-full p-10 relative !default-transition"
       >
         <button 
           onClick={toggleLang}
@@ -40,7 +46,7 @@ export default function Register() {
         </button>
 
         <div className="flex flex-col items-center mb-10">
-          <div className="bg-black dark:bg-white p-3 rounded-lg mb-6">
+          <div className="bg-black dark:bg-white p-3 rounded-lg mb-6 shadow-md">
             <LayoutDashboard className="text-white dark:text-black" size={24} />
           </div>
           <h1 className="text-2xl font-black text-black dark:text-white tracking-tight">{t.registerTitle}</h1>
@@ -48,64 +54,51 @@ export default function Register() {
         </div>
 
         {error && (
-          <div className="bg-stone-50 dark:bg-stone-950 border border-black dark:border-white text-black dark:text-white text-xs font-bold p-4 rounded-lg mb-8 uppercase tracking-widest text-center">
+          <div className="bg-rose-50 border border-rose-200 text-rose-600 dark:bg-rose-950/30 dark:border-rose-900/50 dark:text-rose-400 text-sm font-bold p-4 rounded-xl mb-8 text-center flex items-center justify-center gap-2">
             {error}
           </div>
         )}
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="space-y-2">
-            <label className="text-[10px] font-bold text-stone-400 uppercase tracking-widest ml-1">{t.username}</label>
-            <div className="relative">
-              <User className="absolute left-4 top-1/2 -translate-y-1/2 text-stone-400" size={18} />
-              <input 
-                type="text" 
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                placeholder={t.usernamePlaceholder}
-                className="w-full bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-lg py-3.5 pl-12 pr-4 text-sm focus:outline-none focus:border-black dark:focus:border-white transition-all text-black dark:text-white font-medium"
-                required
-              />
-            </div>
-          </div>
+          <Input 
+            type="text" 
+            label={t.username}
+            icon={<User size={18} />}
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            placeholder={t.usernamePlaceholder}
+            required
+          />
 
-          <div className="space-y-2">
-            <label className="text-[10px] font-bold text-stone-400 uppercase tracking-widest ml-1">{t.email}</label>
-            <div className="relative">
-              <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-stone-400" size={18} />
-              <input 
-                type="email" 
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder={t.emailPlaceholder}
-                className="w-full bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-lg py-3.5 pl-12 pr-4 text-sm focus:outline-none focus:border-black dark:focus:border-white transition-all text-black dark:text-white font-medium"
-                required
-              />
-            </div>
-          </div>
+          <Input 
+            type="email" 
+            label={t.email}
+            icon={<Mail size={18} />}
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder={t.emailPlaceholder}
+            required
+          />
 
-          <div className="space-y-2">
-            <label className="text-[10px] font-bold text-stone-400 uppercase tracking-widest ml-1">{t.passwordLabel}</label>
-            <div className="relative">
-              <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-stone-400" size={18} />
-              <input 
-                type="password" 
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder={t.passwordPlaceholder}
-                className="w-full bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-lg py-3.5 pl-12 pr-4 text-sm focus:outline-none focus:border-black dark:focus:border-white transition-all text-black dark:text-white font-medium"
-                required
-              />
-            </div>
-          </div>
+          <Input 
+            type="password" 
+            label={t.passwordLabel}
+            icon={<Lock size={18} />}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder={t.passwordPlaceholder}
+            required
+          />
 
-          <button 
+          <Button 
             type="submit"
-            className="w-full bg-black dark:bg-white text-white dark:text-black font-black py-4 rounded-lg transition-all flex items-center justify-center gap-2 group hover:opacity-80 active:scale-[0.98] mt-4"
+            disabled={loading}
+            fullWidth
+            className="py-4 mt-2 text-base group"
           >
             {t.registerButton}
-            <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
-          </button>
+            <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform ml-1" />
+          </Button>
         </form>
 
         <div className="mt-10 text-center text-xs font-bold text-stone-400 uppercase tracking-widest">
@@ -114,7 +107,7 @@ export default function Register() {
             {t.loginNow}
           </Link>
         </div>
-      </motion.div>
+      </Card>
     </div>
   );
 }

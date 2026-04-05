@@ -139,4 +139,36 @@ router.delete('/account', authenticateToken, (req: AuthRequest, res) => {
   });
 });
 
+// ──────── API Key 管理 ────────
+import crypto from 'crypto';
+
+/** 生成 / 重新生成 API Key */
+router.post('/apikey/generate', authenticateToken, (req: AuthRequest, res) => {
+  const userId = req.userId;
+  const apiKey = `dpk_${crypto.randomBytes(24).toString('hex')}`;
+
+  db.run('UPDATE users SET api_key = ? WHERE id = ?', [apiKey, userId], function (err) {
+    if (err) return res.status(500).json({ message: 'Database error' });
+    res.json({ apiKey });
+  });
+});
+
+/** 获取当前 API Key（脱敏） */
+router.get('/apikey', authenticateToken, (req: AuthRequest, res) => {
+  const userId = req.userId;
+  db.get('SELECT api_key FROM users WHERE id = ?', [userId], (err, row: any) => {
+    if (err) return res.status(500).json({ message: 'Database error' });
+    res.json({ apiKey: row?.api_key ?? null });
+  });
+});
+
+/** 吊销 API Key */
+router.delete('/apikey', authenticateToken, (req: AuthRequest, res) => {
+  const userId = req.userId;
+  db.run('UPDATE users SET api_key = NULL WHERE id = ?', [userId], function (err) {
+    if (err) return res.status(500).json({ message: 'Database error' });
+    res.json({ message: 'API Key revoked' });
+  });
+});
+
 export default router;

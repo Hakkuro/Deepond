@@ -2,6 +2,7 @@ import React from 'react';
 import { ProfileHero } from '../components/profile/ProfileHero';
 import { ProfileForm } from '../components/profile/ProfileForm';
 import { AccountSettings } from '../components/profile/AccountSettings';
+import { ApiKeySection } from '../components/profile/ApiKeySection';
 import { NotificationPanel } from '../components/profile/NotificationPanel';
 
 export default function Profile() {
@@ -14,6 +15,7 @@ export default function Profile() {
           <div className="flex flex-col gap-12">
             <ProfileHero />
             <ProfileForm />
+            <ApiKeySection />
             <AccountSettings />
           </div>
 

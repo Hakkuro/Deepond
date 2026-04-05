@@ -18,6 +18,7 @@ export const initDb = () => {
         email TEXT UNIQUE,
         password_hash TEXT,
         avatar_seed TEXT,
+        api_key TEXT UNIQUE,
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP
       )`);
 
@@ -73,9 +74,19 @@ export const initDb = () => {
         read INTEGER DEFAULT 0,
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (user_id) REFERENCES users(id)
-      )`, (err) => {
-        if (err) reject(err);
-        else resolve();
+      )`);
+
+      // Migration: 为已有数据库添加 api_key 列
+      db.run(`ALTER TABLE users ADD COLUMN api_key TEXT`, (err) => {
+        // 忽略 "duplicate column" 错误（列已存在时）
+        if (err && !err.message.includes('duplicate column')) {
+          return reject(err);
+        }
+        // 创建唯一索引（若不存在）
+        db.run(`CREATE UNIQUE INDEX IF NOT EXISTS idx_users_api_key ON users(api_key)`, (err) => {
+          if (err) reject(err);
+          else resolve();
+        });
       });
     });
   });

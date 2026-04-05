@@ -1,13 +1,13 @@
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { Trash2, AlignLeft, Calendar, Flag, Lock, MoreHorizontal } from "lucide-react";
+import { Trash2, AlignLeft, Calendar, Flag, MoreHorizontal } from "lucide-react";
 import { Id, Task } from "../types";
 import { cn } from "../lib/utils";
 import { format, isPast, isToday } from "date-fns";
 import React, { memo } from "react";
-import { motion } from "framer-motion";
 import { useAppContext } from "../contexts/AppContext";
 import { useDialog } from "../contexts/DialogContext";
+import { Card } from "./ui/Card";
 
 interface Props {
   task: Task;
@@ -75,16 +75,17 @@ export const TaskCard = memo(function TaskCard({ task, deleteTask, onClick, isRe
   };
 
   return (
-    <div
-      ref={setNodeRef}
+    <Card
+      ref={setNodeRef as any}
       style={style}
       {...attributes}
       {...listeners}
       onClick={() => onClick(task)}
+      hoverable={!isReadOnly}
       className={cn(
-        "bg-white dark:bg-stone-800 p-4 items-start flex flex-col text-left rounded-xl border border-stone-300 dark:border-stone-700 shadow-sm hover:border-black dark:hover:border-white cursor-grab relative group hover:shadow-md",
-        !isDragging && "duration-200",
-        isReadOnly && "cursor-pointer"
+        "p-4 items-start flex flex-col text-left cursor-grab relative group",
+        isReadOnly && "cursor-pointer hover:border-transparent cursor-default",
+        !isDragging && "duration-200"
       )}
     >
       <div className="flex w-full items-start justify-between gap-2 mb-3">
@@ -116,7 +117,7 @@ export const TaskCard = memo(function TaskCard({ task, deleteTask, onClick, isRe
                     });
                     if (ok) deleteTask(task.id);
                 }}
-                className="text-stone-400 hover:text-black dark:hover:text-white transition-all opacity-0 group-hover:opacity-100"
+                className="text-stone-400 hover:text-black dark:hover:text-white transition-all opacity-0 group-hover:opacity-100 p-1 hover:bg-stone-100 dark:hover:bg-stone-800 rounded"
             >
                 <Trash2 size={14} />
             </button>
@@ -128,7 +129,7 @@ export const TaskCard = memo(function TaskCard({ task, deleteTask, onClick, isRe
       </p>
 
       {(task.description || task.dueDate) && (
-        <div className="mt-4 flex items-center justify-between w-full border-t border-stone-200 dark:border-stone-700 pt-3">
+        <div className="mt-4 flex items-center justify-between w-full border-t border-stone-100 dark:border-stone-700/50 pt-3">
           <div className="flex items-center gap-3">
             {task.description && (
                 <div className="flex items-center text-stone-300 dark:text-stone-600">
@@ -138,11 +139,11 @@ export const TaskCard = memo(function TaskCard({ task, deleteTask, onClick, isRe
             {renderDueDate()}
           </div>
           
-          <div className="text-stone-400 dark:text-stone-500">
+          <div className="text-stone-400 dark:text-stone-600">
              <MoreHorizontal size={14} strokeWidth={3} />
           </div>
         </div>
       )}
-    </div>
+    </Card>
   );
 });

@@ -4,6 +4,8 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useAppContext } from '../../contexts/AppContext';
 import { useToast } from '../../contexts/ToastContext';
 import api from '../../lib/api';
+import { Input } from '../ui/Input';
+import { Button } from '../ui/Button';
 
 export function ProfileForm() {
   const { user, updateUser } = useAuth();
@@ -44,67 +46,53 @@ export function ProfileForm() {
         {t.account}
       </h3>
       <div className="grid gap-6">
-        <div className="space-y-2">
-          <label className="text-[11px] font-black text-stone-400 uppercase tracking-[0.2em] ml-1">{t.username}</label>
-          <div className="relative group">
-            <User className="absolute left-4 top-1/2 -translate-y-1/2 text-stone-400 group-focus-within:text-black dark:group-focus-within:text-white transition-colors" size={18} />
-            <input 
-              type="text"
-              value={form.username}
-              onChange={updateField('username')}
-              className="w-full bg-white dark:bg-black border border-stone-200 dark:border-stone-800 rounded-2xl py-4 pl-12 pr-4 text-sm font-bold focus:outline-none focus:border-black dark:focus:border-white transition-all text-black dark:text-white placeholder:text-stone-300"
-              placeholder={t.username}
-              required
-            />
-          </div>
-        </div>
+        <Input 
+          label={t.username}
+          icon={<User size={18} />}
+          value={form.username}
+          onChange={updateField('username')}
+          placeholder={t.usernamePlaceholder || t.username}
+          required
+        />
 
-        <div className="space-y-2">
-          <label className="text-[11px] font-black text-stone-400 uppercase tracking-[0.2em] ml-1">{t.email}</label>
-          <div className="relative group">
-            <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-stone-400 group-focus-within:text-black dark:group-focus-within:text-white transition-colors" size={18} />
-            <input 
-              type="email"
-              value={form.email}
-              onChange={updateField('email')}
-              className="w-full bg-white dark:bg-black border border-stone-200 dark:border-stone-800 rounded-2xl py-4 pl-12 pr-4 text-sm font-bold focus:outline-none focus:border-black dark:focus:border-white transition-all text-black dark:text-white placeholder:text-stone-300"
-              placeholder={t.emailPlaceholder}
-              required
-            />
-          </div>
-        </div>
+        <Input 
+          type="email"
+          label={t.email}
+          icon={<Mail size={18} />}
+          value={form.email}
+          onChange={updateField('email')}
+          placeholder={t.emailPlaceholder}
+          required
+        />
 
-        <div className="space-y-2">
-          <label className="text-[11px] font-black text-stone-400 uppercase tracking-[0.2em] ml-1">{t.avatarSeed}</label>
-          <div className="relative group">
-            <ImageIcon className="absolute left-4 top-1/2 -translate-y-1/2 text-stone-400 group-focus-within:text-black dark:group-focus-within:text-white transition-colors" size={18} />
-            <input 
-              type="text"
-              value={form.avatarSeed}
-              onChange={updateField('avatarSeed')}
-              className="w-full bg-white dark:bg-black border border-stone-200 dark:border-stone-800 rounded-2xl py-4 pl-12 pr-4 text-sm font-bold focus:outline-none focus:border-black dark:focus:border-white transition-all text-black dark:text-white placeholder:text-stone-300"
-              placeholder={t.avatarSeed}
-            />
-            <button 
-              type="button"
-              onClick={() => setForm(prev => ({ ...prev, avatarSeed: Math.random().toString(36).substring(7) }))}
-              className="absolute right-4 top-1/2 -translate-y-1/2 text-stone-400 hover:text-black dark:hover:text-white transition-all"
-              title="Randomize"
-            >
-              <Sparkles size={18} />
-            </button>
-          </div>
+        <div className="relative">
+          <Input 
+            label={t.avatarSeed}
+            icon={<ImageIcon size={18} />}
+            value={form.avatarSeed}
+            onChange={updateField('avatarSeed')}
+            placeholder={t.avatarSeed}
+          />
+          <button 
+            type="button"
+            onClick={() => setForm(prev => ({ ...prev, avatarSeed: Math.random().toString(36).substring(7) }))}
+            className="absolute right-4 bottom-3 text-stone-400 hover:text-black dark:hover:text-white transition-all"
+            title="Randomize"
+          >
+            <Sparkles size={18} />
+          </button>
         </div>
       </div>
 
-      <button 
+      <Button 
         type="submit"
         disabled={loading}
-        className="w-full bg-black dark:bg-white text-white dark:text-black py-4 rounded-2xl font-black text-sm hover:opacity-80 transition-all active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-2 shadow-xl"
+        fullWidth
+        className="py-4 rounded-2xl text-base shadow-xl"
       >
         {loading ? <Loader2 size={20} className="animate-spin" /> : <Check size={20} strokeWidth={3} />}
         {t.saveProfile}
-      </button>
+      </Button>
     </form>
   );
 }

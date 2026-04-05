@@ -24,12 +24,14 @@ initDb().then(() => {
 });
 
 import notificationRoutes from './routes/notifications.js';
+import agentRoutes from './routes/agent.js';
 
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/boards', boardRoutes);
 app.use('/api/ai', aiRoutes);
 app.use('/api/notifications', notificationRoutes);
+app.use('/api/agent', agentRoutes);
 
 // Static files for production (optional)
 if (process.env.NODE_ENV === 'production') {

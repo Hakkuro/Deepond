@@ -4,7 +4,8 @@ import { Task, Priority, Id } from "../types";
 import { cn } from "../lib/utils";
 import { useAppContext } from "../contexts/AppContext";
 import { useDialog } from "../contexts/DialogContext";
-import { motion, AnimatePresence } from "framer-motion";
+import { Modal } from "./ui/Modal";
+import { Button } from "./ui/Button";
 
 interface Props {
   task: Task;
@@ -40,14 +41,7 @@ export function TaskModal({ task, onUpdate, onDelete, onClose, isReadOnly = fals
   const taskIdString = String(task.id);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 dark:bg-black/80 backdrop-blur-sm">
-      <div onClick={onClose} className="absolute inset-0 z-0"></div>
-      
-      <motion.div 
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="bg-white dark:bg-stone-900 rounded-xl w-full max-w-5xl max-h-[90vh] shadow-2xl flex flex-col overflow-hidden relative z-10 border border-stone-300 dark:border-stone-700"
-      >
+    <Modal isOpen={true} onClose={onClose} hideCloseButton noPadding className="max-w-5xl max-h-[90vh]">
         {/* Header */}
         <div className="px-8 py-6 flex items-center justify-between border-b border-stone-200 dark:border-stone-800">
           <div className="flex items-center gap-4">
@@ -194,36 +188,29 @@ export function TaskModal({ task, onUpdate, onDelete, onClose, isReadOnly = fals
 
         {/* Footer Actions */}
         {!isReadOnly && (
-          <div className="px-8 py-6 border-t border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 flex items-center justify-between shadow-inner">
+          <div className="px-8 py-6 border-t border-stone-200 dark:border-stone-800 bg-stone-50/50 dark:bg-stone-900 flex items-center justify-between shadow-[inset_0_1px_3px_rgba(0,0,0,0.02)]">
             <button 
               onClick={async () => { 
                 const ok = await dialog.confirm({ title: t.deleteTask, message: t.confirmDeleteTask, variant: 'danger' });
                 if(ok) { if(onDelete) onDelete(task.id); onClose(); } 
               }}
-              className="flex items-center gap-2 text-stone-500 dark:text-stone-400 hover:text-black dark:hover:text-white font-black text-sm transition-colors"
+              className="flex items-center gap-2 text-stone-400 dark:text-stone-500 hover:text-rose-600 dark:hover:text-rose-500 font-bold text-sm transition-colors uppercase tracking-widest"
             >
               <Trash2 size={16} />
               {t.deleteTask}
             </button>
 
             <div className="flex gap-4">
-              <button 
-                onClick={onClose}
-                className="px-6 py-2.5 border border-stone-300 dark:border-stone-700 rounded-lg text-stone-600 dark:text-stone-300 font-black hover:bg-stone-50 dark:hover:bg-stone-800 transition-all shadow-sm"
-              >
+              <Button onClick={onClose} variant="outline" className="px-6 border-stone-300 dark:border-stone-700">
                 {t.cancel}
-              </button>
-              <button 
-                onClick={handleSave}
-                className="px-8 py-2.5 bg-black dark:bg-white text-white dark:text-black rounded-lg font-black hover:opacity-80 transition-all active:scale-95 flex items-center gap-2"
-              >
+              </Button>
+              <Button onClick={handleSave} className="px-8">
                 <Check size={18} strokeWidth={3} />
                 {t.saveChanges}
-              </button>
+              </Button>
             </div>
           </div>
         )}
-      </motion.div>
-    </div>
+    </Modal>
   );
 }
