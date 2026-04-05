@@ -15,4 +15,7 @@ export type Task = {
   tags?: string[];
   priority?: Priority;
   dueDate?: string;
+  assigneeId?: string;
+  assigneeName?: string;
+  assigneeAvatarSeed?: string;
 };

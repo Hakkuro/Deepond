@@ -61,7 +61,9 @@ export const initDb = () => {
         due_date TEXT,
         tags TEXT, -- JSON string
         position INTEGER,
-        FOREIGN KEY (column_id) REFERENCES columns(id)
+        assignee_id TEXT,
+        FOREIGN KEY (column_id) REFERENCES columns(id),
+        FOREIGN KEY (assignee_id) REFERENCES users(id)
       )`);
 
       // Notifications table
@@ -76,17 +78,21 @@ export const initDb = () => {
         FOREIGN KEY (user_id) REFERENCES users(id)
       )`);
 
-      // Migration: 为已有数据库添加 api_key 列
+      // Migrations
       db.run(`ALTER TABLE users ADD COLUMN api_key TEXT`, (err) => {
-        // 忽略 "duplicate column" 错误（列已存在时）
+        // Ignore "duplicate column" error
         if (err && !err.message.includes('duplicate column')) {
-          return reject(err);
+          console.error('Migration error (api_key):', err);
         }
-        // 创建唯一索引（若不存在）
-        db.run(`CREATE UNIQUE INDEX IF NOT EXISTS idx_users_api_key ON users(api_key)`, (err) => {
-          if (err) reject(err);
-          else resolve();
-        });
+        db.run(`CREATE UNIQUE INDEX IF NOT EXISTS idx_users_api_key ON users(api_key)`);
+      });
+
+      db.run(`ALTER TABLE tasks ADD COLUMN assignee_id TEXT`, (err) => {
+        // Ignore "duplicate column" error
+        if (err && !err.message.includes('duplicate column')) {
+          console.error('Migration error (assignee_id):', err);
+        }
+        resolve();
       });
     });
   });

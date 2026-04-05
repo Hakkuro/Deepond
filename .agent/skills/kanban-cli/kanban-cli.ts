@@ -142,9 +142,10 @@ const commands: Record<string, Handler> = {
     dueDate:  optional(p, 'dueDate') ?? null,
     tags:     tags(p),
     position: num(p, 'position', 0),
+    assigneeId: optional(p, 'assigneeId') ?? null,
   }),
   'tasks:update': (p) => request('PUT', `/tasks/${require_(p, 'id')}`,
-    pick(p, ['content', 'description', 'priority', 'dueDate', 'tags', 'columnId', 'position']),
+    pick(p, ['content', 'description', 'priority', 'dueDate', 'tags', 'columnId', 'position', 'assigneeId']),
   ),
   'tasks:delete': (p) => request('DELETE', `/tasks/${require_(p, 'id')}`),
 
@@ -189,7 +190,7 @@ const HELP: ApiResult = {
     commands: {
       boards:        'list | get --id | create --name | rename --id --name | delete --id',
       columns:       'add --boardId --title [--position] | rename --id --title | delete --id',
-      tasks:         'add --columnId --content [--description --priority --dueDate --tags] | update --id [...] | delete --id',
+      tasks:         'add --columnId --content [--description --priority --dueDate --tags --assigneeId] | update --id [...] | delete --id',
       collaborators: 'list --boardId | add --boardId --email [--permission] | remove --boardId --userId',
       board:         'export --id | import --id --file',
       users:         'list | find --email | find --username',

@@ -394,6 +394,7 @@ export function KanbanBoard({ boardId, searchQuery, permission }: Props) {
       {editingTask && (
         <TaskModal 
           task={editingTask} 
+          boardId={boardId}
           onClose={() => setEditingTask(null)} 
           onUpdate={updateTask} 
           onDelete={deleteTask}

@@ -120,9 +120,11 @@ router.get('/:id', authenticateToken, checkPermission('viewer'), (req: AuthReque
         if (err) return res.status(500).json({ message: 'Database error' });
 
         db.all(
-          `SELECT t.id, t.column_id as columnId, t.content, t.description, t.priority, t.due_date as dueDate, t.tags, t.position 
+          `SELECT t.id, t.column_id as columnId, t.content, t.description, t.priority, t.due_date as dueDate, t.tags, t.position,
+                  t.assignee_id as assigneeId, u.username as assigneeName, u.avatar_seed as assigneeAvatarSeed
            FROM tasks t 
            JOIN columns c ON t.column_id = c.id 
+           LEFT JOIN users u ON t.assignee_id = u.id
            WHERE c.board_id = ? ORDER BY t.position`,
           [boardId],
           (err, tasks: any[]) => {
@@ -250,11 +252,12 @@ router.delete('/columns/:id', authenticateToken, checkPermission('editor'), (req
 // For tasks, we need to know the boardId. The frontend should send it or we find it.
 // Let's assume the frontend adds boardId to these requests.
 router.post('/tasks', authenticateToken, checkPermission('editor'), (req: AuthRequest, res) => {
-  const { columnId, content, description, priority, dueDate, tags, position } = req.body;
+  const { columnId, content, description, priority, dueDate, tags, position, assigneeId } = req.body;
+  // Filter out UI-only fields if they somehow got in
   const taskId = uuidv4();
   db.run(
-    'INSERT INTO tasks (id, column_id, content, description, priority, due_date, tags, position) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-    [taskId, columnId, content, description, priority || 'medium', dueDate, JSON.stringify(tags || []), position || 0],
+    'INSERT INTO tasks (id, column_id, content, description, priority, due_date, tags, position, assignee_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+    [taskId, columnId, content, description, priority || 'medium', dueDate, JSON.stringify(tags || []), position || 0, assigneeId],
     (err) => {
       if (err) return res.status(500).json({ message: 'Database error' });
       db.get('SELECT board_id FROM columns WHERE id = ?', [columnId], (err, row: any) => {
@@ -285,6 +288,8 @@ router.put('/tasks/:id', authenticateToken, checkPermission('editor'), (req: Aut
           // Update the task itself
           const updateFields = { ...fields };
           delete updateFields.boardId;
+          delete updateFields.assigneeName;
+          delete updateFields.assigneeAvatarSeed;
           
           let query = 'UPDATE tasks SET ';
           const params: any[] = [];
@@ -292,7 +297,7 @@ router.put('/tasks/:id', authenticateToken, checkPermission('editor'), (req: Aut
           keys.forEach((key, index) => {
             let val = updateFields[key];
             if (key === 'tags') val = JSON.stringify(val);
-            const dbKey = key === 'columnId' ? 'column_id' : key === 'dueDate' ? 'due_date' : key;
+            const dbKey = key === 'columnId' ? 'column_id' : key === 'dueDate' ? 'due_date' : key === 'assigneeId' ? 'assignee_id' : key;
             query += `${dbKey} = ?`;
             params.push(val);
             if (index < keys.length - 1) query += ', ';
@@ -343,11 +348,11 @@ router.put('/tasks/:id', authenticateToken, checkPermission('editor'), (req: Aut
     // Normal update without position change
     let query = 'UPDATE tasks SET ';
     const params: any[] = [];
-    const keys = Object.keys(fields).filter(k => k !== 'boardId');
+    const keys = Object.keys(fields).filter(k => k !== 'boardId' && k !== 'assigneeName' && k !== 'assigneeAvatarSeed');
     keys.forEach((key, index) => {
       let val = fields[key];
       if (key === 'tags') val = JSON.stringify(val);
-      const dbKey = key === 'columnId' ? 'column_id' : key === 'dueDate' ? 'due_date' : key;
+      const dbKey = key === 'columnId' ? 'column_id' : key === 'dueDate' ? 'due_date' : key === 'assigneeId' ? 'assignee_id' : key;
       query += `${dbKey} = ?`;
       params.push(val);
       if (index < keys.length - 1) query += ', ';

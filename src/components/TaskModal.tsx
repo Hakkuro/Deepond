@@ -1,29 +1,45 @@
 import { useState, useEffect } from "react";
-import { X, Calendar, Tag, AlignLeft, Flag, Trash2, Check, Lock, Clock } from "lucide-react";
+import { X, Calendar, Tag, AlignLeft, Flag, Trash2, Check, Lock, Clock, User } from "lucide-react";
 import { Task, Priority, Id } from "../types";
 import { cn } from "../lib/utils";
 import { useAppContext } from "../contexts/AppContext";
 import { useDialog } from "../contexts/DialogContext";
 import { Modal } from "./ui/Modal";
 import { Button } from "./ui/Button";
+import api from "../lib/api";
 
 interface Props {
   task: Task;
+  boardId: string;
   onUpdate: (task: Task) => void;
   onDelete?: (id: Id) => void;
   onClose: () => void;
   isReadOnly?: boolean;
 }
 
-export function TaskModal({ task, onUpdate, onDelete, onClose, isReadOnly = false }: Props) {
+export function TaskModal({ task, boardId, onUpdate, onDelete, onClose, isReadOnly = false }: Props) {
   const [content, setContent] = useState(task.content);
   const [description, setDescription] = useState(task.description || "");
   const [priority, setPriority] = useState<Priority | undefined>(task.priority);
   const [dueDate, setDueDate] = useState(task.dueDate || "");
   const [tags, setTags] = useState(task.tags?.join(", ") || "");
+  const [assigneeId, setAssigneeId] = useState<string | undefined>(task.assigneeId);
+  const [collaborators, setCollaborators] = useState<any[]>([]);
   
   const { t } = useAppContext();
   const dialog = useDialog();
+
+  useEffect(() => {
+    const fetchCollaborators = async () => {
+      try {
+        const res = await api.get(`/boards/${boardId}/collaborators`);
+        setCollaborators(res.data);
+      } catch (err) {
+        console.error('Failed to fetch collaborators:', err);
+      }
+    };
+    fetchCollaborators();
+  }, [boardId]);
 
   const handleSave = () => {
     if (isReadOnly) return;
@@ -32,6 +48,7 @@ export function TaskModal({ task, onUpdate, onDelete, onClose, isReadOnly = fals
       content,
       description,
       priority,
+      assigneeId,
       dueDate: dueDate || undefined,
       tags: tags.split(",").map(t => t.trim()).filter(t => t !== ""),
     });
@@ -107,6 +124,36 @@ export function TaskModal({ task, onUpdate, onDelete, onClose, isReadOnly = fals
 
           {/* Sidebar */}
           <div className="w-full lg:w-80 p-8 bg-stone-50/50 dark:bg-black/20 space-y-10">
+            {/* Assignee */}
+            <div className="space-y-4">
+              <label className="text-xs font-black text-stone-500 dark:text-stone-400 uppercase tracking-widest ml-1 flex items-center gap-2">
+                <User size={16} strokeWidth={3} />
+                {t.assignTo}
+              </label>
+              <div className="space-y-2">
+                {collaborators.map(c => (
+                  <button
+                    key={c.id}
+                    disabled={isReadOnly}
+                    onClick={() => setAssigneeId(assigneeId === c.id ? undefined : c.id)}
+                    className={cn(
+                      "w-full flex items-center gap-3 px-3 py-2 rounded-lg border transition-all text-left",
+                      assigneeId === c.id 
+                        ? "bg-black text-white border-black dark:bg-white dark:text-black dark:border-white shadow-md scale-[1.02]" 
+                        : "bg-white dark:bg-stone-800 text-stone-600 dark:text-stone-300 border-stone-200 dark:border-stone-700 hover:border-black dark:hover:border-white",
+                      isReadOnly && assigneeId !== c.id && "hidden"
+                    )}
+                  >
+                    <div className="w-6 h-6 rounded-full bg-stone-100 dark:bg-stone-900 border border-stone-200 dark:border-stone-700 overflow-hidden flex-shrink-0">
+                      <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${c.avatar_seed || c.id}`} alt="avatar" className="w-full h-full object-cover" />
+                    </div>
+                    <span className="text-sm font-bold truncate">{c.username}</span>
+                    {assigneeId === c.id && <Check size={14} className="ml-auto" />}
+                  </button>
+                ))}
+              </div>
+            </div>
+
             {/* Priority */}
             <div className="space-y-4">
               <label className="text-xs font-black text-stone-500 dark:text-stone-400 uppercase tracking-widest ml-1 flex items-center gap-2">
@@ -122,9 +169,9 @@ export function TaskModal({ task, onUpdate, onDelete, onClose, isReadOnly = fals
                     className={cn(
                       "flex items-center justify-between px-4 py-3 rounded-lg text-sm font-black transition-all border",
                       priority === p 
-                        ? p === 'high' ? 'bg-black text-white border-black dark:bg-white dark:text-black dark:border-white' 
-                          : p === 'medium' ? 'bg-stone-200 text-black border-stone-400 dark:bg-stone-700 dark:text-white dark:border-stone-500' 
-                          : 'bg-white text-stone-700 border-stone-300 dark:bg-stone-800 dark:text-stone-200 dark:border-stone-600'
+                        ? p === 'high' ? 'bg-purple-600 text-white border-purple-800' 
+                          : p === 'medium' ? 'bg-blue-600 text-white border-blue-800' 
+                          : 'bg-green-600 text-white border-green-800'
                         : "bg-white dark:bg-stone-800 text-stone-500 dark:text-stone-400 border-stone-200 dark:border-stone-700 hover:border-black dark:hover:border-white shadow-sm",
                       isReadOnly && priority !== p && "hidden"
                     )}

@@ -45,8 +45,12 @@ router.get('/boards/:id', async (req: AgentRequest, res) => {
     const columns = await dbAll('SELECT * FROM columns WHERE board_id = ? ORDER BY position', [boardId]);
     const tasks = await dbAll(
       `SELECT t.id, t.column_id as columnId, t.content, t.description, t.priority,
-              t.due_date as dueDate, t.tags, t.position
-       FROM tasks t JOIN columns c ON t.column_id = c.id WHERE c.board_id = ? ORDER BY t.position`,
+              t.due_date as dueDate, t.tags, t.position, t.assignee_id as assigneeId,
+              u.username as assigneeName, u.avatar_seed as assigneeAvatarSeed
+       FROM tasks t 
+       JOIN columns c ON t.column_id = c.id 
+       LEFT JOIN users u ON t.assignee_id = u.id
+       WHERE c.board_id = ? ORDER BY t.position`,
       [boardId]
     );
 
@@ -130,12 +134,12 @@ router.delete('/columns/:id', async (req: AgentRequest, res) => {
 
 router.post('/tasks', async (req: AgentRequest, res) => {
   try {
-    const { columnId, content, description, priority, dueDate, tags, position } = req.body;
+    const { columnId, content, description, priority, dueDate, tags, position, assigneeId } = req.body;
     if (!columnId || !content) return fail(res, 400, 'columnId and content are required');
     const taskId = uuidv4();
     await dbRun(
-      'INSERT INTO tasks (id, column_id, content, description, priority, due_date, tags, position) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-      [taskId, columnId, content, description ?? '', priority ?? 'medium', dueDate ?? null, JSON.stringify(tags ?? []), position ?? 0]
+      'INSERT INTO tasks (id, column_id, content, description, priority, due_date, tags, position, assignee_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+      [taskId, columnId, content, description ?? '', priority ?? 'medium', dueDate ?? null, JSON.stringify(tags ?? []), position ?? 0, assigneeId ?? null]
     );
     ok(res, { id: taskId, columnId, content });
   } catch (e: any) { fail(res, 500, e.message); }
@@ -145,7 +149,11 @@ router.put('/tasks/:id', async (req: AgentRequest, res) => {
   try {
     const fields = req.body;
     const taskId = req.params.id;
-    const mapping: Record<string, string> = { columnId: 'column_id', dueDate: 'due_date' };
+    const mapping: Record<string, string> = { 
+      columnId: 'column_id', 
+      dueDate: 'due_date',
+      assigneeId: 'assignee_id'
+    };
     const setClauses: string[] = [];
     const params: any[] = [];
 
@@ -240,8 +248,8 @@ router.post('/boards/:id/import', async (req: AgentRequest, res) => {
       for (const task of (col.tasks ?? [])) {
         const taskId = task.id ?? uuidv4();
         await dbRun(
-          'INSERT INTO tasks (id, column_id, content, description, priority, due_date, tags, position) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-          [taskId, colId, task.content, task.description, task.priority, task.due_date, JSON.stringify(task.tags ?? []), task.position]
+          'INSERT INTO tasks (id, column_id, content, description, priority, due_date, tags, position, assignee_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+          [taskId, colId, task.content, task.description, task.priority, task.due_date, JSON.stringify(task.tags ?? []), task.position, task.assignee_id]
         );
       }
     }
