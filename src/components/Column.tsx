@@ -107,7 +107,7 @@ export const BoardColumn = memo(function BoardColumn({
       <div
         {...attributes}
         {...listeners}
-        className={`h-[60px] ${isReadOnly ? 'cursor-default' : 'cursor-grab'} px-4 font-black text-black dark:text-white flex items-center justify-between border-b border-stone-200 dark:border-stone-800`}
+        className={`h-[60px] shrink-0 ${isReadOnly ? 'cursor-default' : 'cursor-grab'} px-4 font-black text-black dark:text-white flex items-center justify-between border-b border-stone-200 dark:border-stone-800`}
       >
         <div className="flex gap-3 items-center w-full min-w-0">
             <div className="flex justify-center items-center bg-black dark:bg-white px-2 py-0.5 text-xs rounded font-black text-white dark:text-black border border-black dark:border-white">
